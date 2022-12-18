@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Menu;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -21,7 +22,25 @@ class MenuRepository extends ServiceEntityRepository
         parent::__construct($registry, Menu::class);
     }
 
-    public function save(Menu $entity, bool $flush = false): void
+    /**
+     * @return Menu[]
+     */
+    public function findAllForTwig(): array
+    {
+        return $this->createQueryBuilder('m')
+            ->where('m.isVisible = true')
+            ->orderBy('m.menuOrder')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function getIndexQueryBuilder(string $field): QueryBuilder
+    {
+        return $this->createQueryBuilder('m')
+            ->where("m.$field IS NOT NULL OR (m.page IS NULL AND m.link IS NULL AND m.category IS NULL)");
+    }
+
+    /*public function save(Menu $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
 
@@ -37,7 +56,7 @@ class MenuRepository extends ServiceEntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
-    }
+    }*/
 
 //    /**
 //     * @return Menu[] Returns an array of Menu objects
