@@ -33,6 +33,8 @@ class ArticleCrudController extends AbstractCrudController
 
            yield AssociationField::new('categories');
 
+           yield AssociationField::new('featuredImage');
+
            yield DateTimeField::new('createdAt')
                ->hideOnForm();
 

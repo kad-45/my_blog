@@ -1,4 +1,5 @@
 {% set menus = menu_service.findAll %}
+{% set options = option_service.findAll %}
 
 
 <!DOCTYPE html>
@@ -17,17 +18,19 @@
         {% endblock %}
     </head>
     <body>
-
+    {% if is_granted('ROLE_AUTHOR') %}
         <nav class="py-2 bg-dark border-bottom">
             <div class="container d-flex flex-wrap">
 
                 <div class="dropdown">
                     <a class="nav nav-link dropdown-toggle text-white" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Mon blog
+                       {{ options['blog_title'] }}
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonAdminDashboard">
                         <li><a class="dropdown-item" href="{{ path('admin') }}">Tableau de bord</a></li>
-                        <li><a class="dropdown-item" href="{{ ea_index('MenuCrudController') }}">Menus</a></li>
+                        {% if is_granted('ROLE_ADMIN') %}
+                        <li><a class="dropdown-item" href="{{ ea_gen_url('MenuCrudController') }}">Menus</a></li>
+                        {% endif %}
                     </ul>
                 </div>
 
@@ -36,17 +39,18 @@
                        Ajouter
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonAdminAdd">
-                        <li><a class="dropdown-item" href="#">Article</a></li>
-                        <li><a class="dropdown-item" href="#">Page</a></li>
+                        <li><a class="dropdown-item" href="{{ ea_gen_url('ArticleCrudController', 'new') }}">Article</a></li>
+                        <li><a class="dropdown-item" href="{{ ea_gen_url('PageCrudControllere', 'new') }}">Page</a></li>
                     </ul>
                 </div>
             </div>
         </nav>
+    {% endif %}
 
         <div class="container">
             <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
                 <a class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none" href="{{ path('app_home') }}">
-                    <span class="fs-4">Mon blog</span>
+                    <span class="fs-4"> {{ options['blog_title'] }}</span>
                 </a>
                 <ul class="nav nav-pills">
                     {% for menu in menus %}
@@ -68,9 +72,11 @@
                         {% endif %}
                     {% endfor %}
                     {% if not is_granted('IS_AUTHENTICATED_FULLY') %}
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" href="{{ path('app_register') }}">S'inscrire</a>
-                        </li>
+                            {% if options['users_can_register'] == '1' %}
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" href="{{ path('app_register') }}">S'inscrire</a>
+                                </li>
+                            {% endif %}
                         <li class="nav-item">
                             <a class="nav-link text-dark"  href="{{ path('app_login') }}">Se connecter</a>
                         </li>
@@ -81,7 +87,7 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li>
-                                <a href="" class="dropdown-item">Mon Profil</a>
+                                <a href="{{ path('app_profile', { username: app.user.username }) }}" class="dropdown-item">Mon Profil</a>
                             </li>
                             <li>
                                 <a href="{{ path('app_logout') }}" class="dropdown-item">Déconnexion</a>
@@ -97,7 +103,7 @@
         <div class="container">
             <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
                 <div class="col-md-4 d-flex align-items-center">
-                    <span class="copyright">@ {{ 'now'|date('Y') }} TechTAF². Tous droits réservés</span>
+                    <span class="copyright">@ {{ 'now'|date('Y') }} {{ options['blog_copyright'] }}</span>
                 </div>
             </footer>
         </div>

@@ -4,6 +4,9 @@ namespace App\Repository;
 
 use App\Entity\Option;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -21,6 +24,39 @@ class OptionRepository extends ServiceEntityRepository
         parent::__construct($registry, Option::class);
     }
 
+    /**
+     * @return Option[]
+     */
+
+    public function findAllForTwig(): array
+    {
+        return $this->createQueryBuilder('o', 'o.name')
+            //->select('o.name', 'o.value')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function getValue(string $name): mixed
+    {
+        try {
+            return $this->createQueryBuilder('o')
+                ->select('o.value')
+                ->where('o.name = :name')
+                ->setParameter('name', $name)
+                ->getQuery()
+                ->getSingleScalarResult();
+
+        }catch (NoResultException|NonUniqueResultException) {
+            return  null;
+        }
+    }
+
+    public function getIndexQueryBuilder(): QueryBuilder
+    {
+        return $this->createQueryBuilder('o')
+            ->where('o.type IS NOT NULL');
+    }
+/*
     public function save(Option $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
@@ -37,7 +73,7 @@ class OptionRepository extends ServiceEntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
-    }
+    }*/
 
 //    /**
 //     * @return Option[] Returns an array of Option objects

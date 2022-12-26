@@ -28,7 +28,8 @@ class CommentType extends AbstractType
         $builder->get('article')
                 ->addModelTransformer(new CallbackTransformer(
                     fn (Article $article) => $article->getId(),
-                    fn (Article $article) => $article->getTitle()
+                    fn (Article $article) => $article->getTitle(),
+
                 ));
     }
 
